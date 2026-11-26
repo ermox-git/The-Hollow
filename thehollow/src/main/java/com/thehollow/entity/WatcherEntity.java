@@ -1,8 +1,10 @@
 package com.thehollow.entity;
 
 import com.thehollow.ModItems;
+import java.util.EnumSet;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
+import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
@@ -41,8 +43,10 @@ public class WatcherEntity extends HostileEntity {
     protected void initGoals() {
         this.goalSelector.add(0, new SwimGoal(this));
         this.goalSelector.add(1, new MeleeAttackGoal(this, 1.0, false));
-        this.goalSelector.add(2, new WanderAroundFarGoal(this, 0.8));
-        this.goalSelector.add(3, new LookAtEntityGoal(this, PlayerEntity.class, 24.0f));
+        // Walks toward the nearest player even when it cannot target them (e.g. creative mode).
+        this.goalSelector.add(2, new StalkGoal(this));
+        this.goalSelector.add(3, new WanderAroundFarGoal(this, 0.8, 0.02f));
+        this.goalSelector.add(4, new LookAtEntityGoal(this, PlayerEntity.class, 24.0f));
         this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
     }
 
@@ -58,7 +62,7 @@ public class WatcherEntity extends HostileEntity {
         for (PlayerEntity player : this.getWorld().getPlayers()) {
             if (player.isSpectator()) continue;
             double distSq = player.squaredDistanceTo(this);
-            if (distSq > 48.0 * 48.0) continue;
+            if (distSq > 40.0 * 40.0) continue;
 
             boolean holdsLantern = player.getMainHandStack().isOf(ModItems.WARD_LANTERN)
                     || player.getOffHandStack().isOf(ModItems.WARD_LANTERN);
@@ -69,7 +73,7 @@ public class WatcherEntity extends HostileEntity {
                     this.getX() - player.getX(),
                     this.getEyeY() - player.getEyeY(),
                     this.getZ() - player.getZ()).normalize();
-            if (look.dotProduct(toMe) > 0.6 && player.canSee(this)) return true;
+            if (look.dotProduct(toMe) > 0.75 && player.canSee(this)) return true;
         }
         return false;
     }
@@ -106,5 +110,41 @@ public class WatcherEntity extends HostileEntity {
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.ENTITY_ENDERMAN_DEATH;
+    }
+
+    /** Slowly closes in on the nearest player. */
+    private static class StalkGoal extends Goal {
+        private final WatcherEntity watcher;
+        private PlayerEntity prey;
+
+        StalkGoal(WatcherEntity watcher) {
+            this.watcher = watcher;
+            this.setControls(EnumSet.of(Goal.Control.MOVE));
+        }
+
+        @Override
+        public boolean canStart() {
+            this.prey = this.watcher.getWorld().getClosestPlayer(this.watcher, 40.0);
+            return this.prey != null && !this.prey.isSpectator();
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return this.prey != null && this.prey.isAlive() && !this.prey.isSpectator()
+                    && this.watcher.squaredDistanceTo(this.prey) < 45.0 * 45.0;
+        }
+
+        @Override
+        public void tick() {
+            if (this.watcher.age % 10 == 0) {
+                this.watcher.getNavigation().startMovingTo(this.prey, 1.0);
+            }
+        }
+
+        @Override
+        public void stop() {
+            this.watcher.getNavigation().stop();
+            this.prey = null;
+        }
     }
 }
