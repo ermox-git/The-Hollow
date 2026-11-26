@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "thehollow",
+  "version": "${version}",
+  "name": "The Hollow",
+  "description": "Something watches from the dark. Only the Veilcutter can end it.",
+  "authors": [
+    "You"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.thehollow.TheHollow"
+    ],
+    "client": [
+      "com.thehollow.client.TheHollowClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
