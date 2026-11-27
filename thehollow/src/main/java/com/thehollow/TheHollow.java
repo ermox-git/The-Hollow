@@ -10,11 +10,13 @@ public class TheHollow implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        ModBlocks.register();
         ModEntities.register();
         ModItems.register();
         DreadEvents.register();
         PowerNetworking.register();
         Powers.register();
+        Altar.register();
         LOGGER.info("The Hollow is awake.");
     }
 }

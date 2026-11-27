@@ -2,7 +2,10 @@ package com.thehollow.entity;
 
 import com.thehollow.ModItems;
 import java.util.EnumSet;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
@@ -25,6 +28,7 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -79,7 +83,8 @@ public class WatcherEntity extends HostileEntity {
         this.goalSelector.add(2, new StalkGoal(this));
         this.goalSelector.add(3, new WanderAroundFarGoal(this, 0.8, 0.02f));
         this.goalSelector.add(4, new LookAtEntityGoal(this, PlayerEntity.class, 24.0f));
-        this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
+        this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false,
+                e -> e instanceof PlayerEntity p && canNotice(p)));
     }
 
     @Override
@@ -95,6 +100,9 @@ public class WatcherEntity extends HostileEntity {
                     tickRage();
                 }
                 default -> this.observed = isObserved();
+            }
+            if (this.age % 40 == 0) {
+                snuffTorch();
             }
         }
         super.tick();
@@ -163,6 +171,29 @@ public class WatcherEntity extends HostileEntity {
         if (nbt.getInt("WatcherRage") != CALM) {
             setRageState(ENRAGED);
             applyRageStats();
+        }
+    }
+
+    // ------------------------------------------------------------------ mask + dread
+
+    /** A calm Watcher ignores anyone wearing the Hollow Mask. Once it has been hit, nobody is hidden. */
+    private boolean canNotice(PlayerEntity player) {
+        if (player.isSpectator()) return false;
+        if (getRageState() != CALM) return true;
+        return !player.getEquippedStack(EquipmentSlot.HEAD).isOf(ModItems.HOLLOW_MASK);
+    }
+
+    /** Puts out one nearby torch every couple of seconds. */
+    private void snuffTorch() {
+        if (!(this.getWorld() instanceof ServerWorld world)) return;
+        BlockPos center = this.getBlockPos();
+        for (BlockPos pos : BlockPos.iterate(center.add(-6, -3, -6), center.add(6, 4, 6))) {
+            BlockState state = world.getBlockState(pos);
+            if (state.isOf(Blocks.TORCH) || state.isOf(Blocks.WALL_TORCH)
+                    || state.isOf(Blocks.SOUL_TORCH) || state.isOf(Blocks.SOUL_WALL_TORCH)) {
+                world.breakBlock(pos.toImmutable(), true);
+                break;
+            }
         }
     }
 
@@ -241,7 +272,9 @@ public class WatcherEntity extends HostileEntity {
 
         @Override
         public boolean canStart() {
-            this.prey = this.watcher.getWorld().getClosestPlayer(this.watcher, 40.0);
+            this.prey = this.watcher.getWorld().getClosestPlayer(
+                    this.watcher.getX(), this.watcher.getY(), this.watcher.getZ(), 40.0,
+                    e -> e instanceof PlayerEntity p && this.watcher.canNotice(p));
             return this.prey != null && !this.prey.isSpectator();
         }
 

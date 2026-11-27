@@ -6,12 +6,12 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.util.Identifier;
 
-public class WatcherRenderer extends MobEntityRenderer<WatcherEntity, WatcherModel> {
+public class WatcherRenderer extends MobEntityRenderer<WatcherEntity, WatcherModel<WatcherEntity>> {
     private static final Identifier CALM_TEXTURE = Identifier.of(TheHollow.MOD_ID, "textures/entity/watcher.png");
     private static final Identifier ENRAGED_TEXTURE = Identifier.of(TheHollow.MOD_ID, "textures/entity/watcher_enraged.png");
 
     public WatcherRenderer(EntityRendererFactory.Context context) {
-        super(context, new WatcherModel(context.getPart(WatcherModel.LAYER)), 0.5f);
+        super(context, new WatcherModel<>(context.getPart(WatcherModel.LAYER)), 0.5f);
     }
 
     @Override

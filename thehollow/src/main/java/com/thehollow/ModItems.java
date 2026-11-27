@@ -1,6 +1,8 @@
 package com.thehollow;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.ArmorItem;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.SpawnEggItem;
@@ -42,6 +44,13 @@ public final class ModItems {
     public static final Item STILLNESS_ORB = add("stillness_orb",
             new StillnessOrbItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC).fireproof()));
 
+    public static final Item HOLLOW_MASK = add("hollow_mask",
+            new ArmorItem(ModArmorMaterials.HOLLOW_MASK, ArmorItem.Type.HELMET,
+                    new Item.Settings().maxCount(1).rarity(Rarity.EPIC).fireproof()));
+
+    public static final Item HOLLOW_ALTAR = add("hollow_altar",
+            new BlockItem(ModBlocks.HOLLOW_ALTAR, new Item.Settings().rarity(Rarity.EPIC)));
+
     private ModItems() {}
 
     private static Item add(String id, Item item) {
@@ -56,7 +65,9 @@ public final class ModItems {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(e -> {
             e.add(VEILCUTTER);
             e.add(REAPERS_EDGE);
+            e.add(HOLLOW_MASK);
         });
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(e -> e.add(HOLLOW_ALTAR));
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(e -> {
             e.add(WARD_LANTERN);
             e.add(WALL_RUNE);

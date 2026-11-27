@@ -7,5 +7,10 @@
   "item.thehollow.reapers_edge": "Reaper's Edge",
   "entity.thehollow.watcher": "The Watcher",
   "item.thehollow.wall_rune": "Wall Rune",
-  "item.thehollow.stillness_orb": "Stillness Orb"
+  "item.thehollow.stillness_orb": "Stillness Orb",
+  "block.thehollow.hollow_altar": "Hollow Altar",
+  "item.thehollow.hollow_mask": "Hollow Mask",
+  "entity.thehollow.hollow_titan": "The Hollow Titan",
+  "entity.thehollow.mini_watcher": "Mini Watcher",
+  "entity.thehollow.hollow_boulder": "Hollow Boulder"
 }

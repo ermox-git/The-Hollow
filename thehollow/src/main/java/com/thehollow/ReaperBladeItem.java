@@ -1,5 +1,6 @@
 package com.thehollow;
 
+import com.thehollow.entity.HollowTitanEntity;
 import com.thehollow.entity.WatcherEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,6 +28,7 @@ public class ReaperBladeItem extends SwordItem {
                 && attacker instanceof PlayerEntity player
                 && !(target instanceof PlayerEntity)
                 && !(target instanceof WatcherEntity)
+                && !(target instanceof HollowTitanEntity)
                 && !player.getItemCooldownManager().isCoolingDown(this)) {
             target.damage(player.getDamageSources().playerAttack(player), Float.MAX_VALUE);
             if (target.isAlive()) {

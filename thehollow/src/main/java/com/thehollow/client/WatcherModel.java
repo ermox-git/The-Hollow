@@ -2,6 +2,7 @@ package com.thehollow.client;
 
 import com.thehollow.TheHollow;
 import com.thehollow.entity.WatcherEntity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.client.model.ModelData;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.model.ModelPartBuilder;
@@ -14,7 +15,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 /** Tall, gaunt figure: tiny cocked head with a hanging jaw, ribs, and arms that reach the knees. */
-public class WatcherModel extends SinglePartEntityModel<WatcherEntity> {
+public class WatcherModel<T extends HostileEntity> extends SinglePartEntityModel<T> {
     public static final EntityModelLayer LAYER =
             new EntityModelLayer(Identifier.of(TheHollow.MOD_ID, "watcher"), "main");
 
@@ -69,10 +70,10 @@ public class WatcherModel extends SinglePartEntityModel<WatcherEntity> {
     }
 
     @Override
-    public void setAngles(WatcherEntity entity, float limbAngle, float limbDistance,
+    public void setAngles(T entity, float limbAngle, float limbDistance,
                           float animationProgress, float headYaw, float headPitch) {
         float rad = (float) Math.PI / 180.0f;
-        int state = entity.getRageState();
+        int state = entity instanceof WatcherEntity watcher ? watcher.getRageState() : WatcherEntity.CALM;
 
         this.head.yaw = headYaw * rad;
         this.head.pitch = headPitch * rad;
