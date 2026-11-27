@@ -45,7 +45,7 @@ public final class ModEntities {
     public static final EntityType<HollowBoulderEntity> HOLLOW_BOULDER = Registry.register(
             Registries.ENTITY_TYPE,
             Identifier.of(TheHollow.MOD_ID, "hollow_boulder"),
-           EntityType.Builder.<HollowBoulderEntity>create(HollowBoulderEntity::new, SpawnGroup.MISC)
+            EntityType.Builder.create(HollowBoulderEntity::new, SpawnGroup.MISC)
                     .dimensions(0.6f, 0.6f)
                     .maxTrackingRange(8)
                     .trackingTickInterval(5)
