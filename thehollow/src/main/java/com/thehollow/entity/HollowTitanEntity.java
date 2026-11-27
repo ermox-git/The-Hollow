@@ -21,8 +21,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 /**
@@ -37,7 +37,7 @@ public class HollowTitanEntity extends HostileEntity {
             DataTracker.registerData(HollowTitanEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
     private final ServerBossBar bossBar =
-            new ServerBossBar(this.getDisplayName(), BossBar.Color.PURPLE, BossBar.Style.PROGRESS);
+            new ServerBossBar(Text.literal("The Hollow Titan"), BossBar.Color.PURPLE, BossBar.Style.PROGRESS);
 
     private int throwCooldown = 60;
     private int summonCooldown = 120;
@@ -121,7 +121,7 @@ public class HollowTitanEntity extends HostileEntity {
     private void faceTarget(PlayerEntity target) {
         double dx = target.getX() - this.getX();
         double dz = target.getZ() - this.getZ();
-        float yaw = (float) (MathHelper.atan2(dz, dx) * 180.0 / Math.PI) - 90.0f;
+        float yaw = (float) (Math.atan2(dz, dx) * 180.0 / Math.PI) - 90.0f;
         this.setYaw(yaw);
         this.setBodyYaw(yaw);
         this.setHeadYaw(yaw);
@@ -143,7 +143,7 @@ public class HollowTitanEntity extends HostileEntity {
         HollowBoulderEntity boulder = new HollowBoulderEntity(this.getWorld(), this);
         boulder.setPosition(this.getX(), this.getY() + 4.5, this.getZ());
         double dx = target.getX() - boulder.getX();
-        double dy = target.getBodyY(0.33) - boulder.getY();
+        double dy = (target.getY() + target.getHeight() * 0.33) - boulder.getY();
         double dz = target.getZ() - boulder.getZ();
         double flat = Math.sqrt(dx * dx + dz * dz);
         boulder.setVelocity(dx, dy + flat * 0.2, dz, 1.4f, 2.0f + spread);
@@ -158,7 +158,7 @@ public class HollowTitanEntity extends HostileEntity {
             for (int attempt = 0; attempt < 6; attempt++) {
                 double angle = this.random.nextDouble() * Math.PI * 2.0;
                 double radius = 4.0 + this.random.nextDouble() * 2.5;
-                BlockPos pos = BlockPos.ofFloored(getX() + Math.cos(angle) * radius, getY(), getZ() + Math.sin(angle) * radius);
+                BlockPos pos = new BlockPos((int) Math.floor(getX() + Math.cos(angle) * radius), (int) Math.floor(getY()), (int) Math.floor(getZ() + Math.sin(angle) * radius));
                 if (this.getWorld().getBlockState(pos).isAir() && this.getWorld().getBlockState(pos.up()).isAir()) {
                     MiniWatcherEntity mini = ModEntities.MINI_WATCHER.create(this.getWorld());
                     if (mini != null) {

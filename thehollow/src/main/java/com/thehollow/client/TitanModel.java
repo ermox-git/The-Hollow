@@ -13,78 +13,97 @@ import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-/** Upper half of a huge Watcher: wide shoulders, square head, spiked brow, no legs. */
+/** The Giant: custom Blockbench model (converted from Mojang mappings to Yarn). */
 public class TitanModel extends SinglePartEntityModel<HollowTitanEntity> {
     public static final EntityModelLayer LAYER =
             new EntityModelLayer(Identifier.of(TheHollow.MOD_ID, "hollow_titan"), "main");
 
     private final ModelPart root;
-    private final ModelPart head;
-    private final ModelPart jaw;
-    private final ModelPart rightArm;
-    private final ModelPart leftArm;
+    private final ModelPart bbMain;
 
     public TitanModel(ModelPart root) {
         this.root = root;
-        this.head = root.getChild("head");
-        this.jaw = this.head.getChild("jaw");
-        this.rightArm = root.getChild("right_arm");
-        this.leftArm = root.getChild("left_arm");
+        this.bbMain = root.getChild("bb_main");
     }
 
     public static TexturedModelData getTexturedModelData() {
         ModelData data = new ModelData();
         ModelPartData root = data.getRoot();
 
-        root.addChild("body",
-                ModelPartBuilder.create().uv(0, 60).cuboid(-14.0f, 0.0f, -7.0f, 28.0f, 40.0f, 14.0f),
-                ModelTransform.pivot(0.0f, -16.0f, 0.0f));
+        ModelPartData bb_main = root.addChild("bb_main", ModelPartBuilder.create().uv(0, 53).cuboid(-11.0F, -42.0F, -14.0F, 22.0F, 42.0F, 28.0F).uv(0, 381).cuboid(-26.0F, -1.0F, -25.0F, 52.0F, 1.0F, 52.0F),
+                ModelTransform.pivot(0.0F, 24.0F, 0.0F));
 
-        ModelPartData head = root.addChild("head",
-                ModelPartBuilder.create().uv(0, 0).cuboid(-9.0f, -18.0f, -9.0f, 18.0f, 18.0f, 18.0f),
-                ModelTransform.pivot(0.0f, -17.0f, 0.0f));
-        head.addChild("jaw",
-                ModelPartBuilder.create().uv(0, 36).cuboid(-7.0f, 0.0f, -7.0f, 14.0f, 8.0f, 14.0f),
-                ModelTransform.pivot(0.0f, -1.0f, 0.0f));
-        ModelPartBuilder spike = ModelPartBuilder.create().uv(72, 0).cuboid(-2.0f, -12.0f, -2.0f, 4.0f, 12.0f, 4.0f);
-        head.addChild("spike_left", spike, ModelTransform.pivot(-5.0f, -18.0f, 0.0f));
-        head.addChild("spike_mid", spike, ModelTransform.pivot(0.0f, -18.0f, 0.0f));
-        head.addChild("spike_right", spike, ModelTransform.pivot(5.0f, -18.0f, 0.0f));
+        ModelPartData cube_r1 = bb_main.addChild("cube_r1", ModelPartBuilder.create().uv(204, 53).cuboid(7.0F, -24.0F, -11.0F, 22.0F, 6.0F, 8.0F),
+                ModelTransform.of(0.0F, 21.0F, -87.0F, 0.0F, -1.5272F, 0.0F));
 
-        ModelPartData rightArm = root.addChild("right_arm",
-                ModelPartBuilder.create().uv(88, 0).cuboid(-5.0f, 0.0f, -5.0f, 10.0f, 34.0f, 10.0f),
-                ModelTransform.pivot(-19.0f, -13.0f, 0.0f));
-        ModelPartData leftArm = root.addChild("left_arm",
-                ModelPartBuilder.create().uv(88, 0).cuboid(-5.0f, 0.0f, -5.0f, 10.0f, 34.0f, 10.0f),
-                ModelTransform.pivot(19.0f, -13.0f, 0.0f));
-        ModelPartBuilder shoulderSpike = ModelPartBuilder.create().uv(72, 0).cuboid(-2.0f, -10.0f, -2.0f, 4.0f, 10.0f, 4.0f);
-        rightArm.addChild("shoulder_spike", shoulderSpike, ModelTransform.pivot(0.0f, 0.0f, 0.0f));
-        leftArm.addChild("shoulder_spike", shoulderSpike, ModelTransform.pivot(0.0f, 0.0f, 0.0f));
+        ModelPartData cube_r2 = bb_main.addChild("cube_r2", ModelPartBuilder.create().uv(0, 123).cuboid(7.0F, -24.0F, -11.0F, 29.0F, 6.0F, 8.0F),
+                ModelTransform.of(0.0F, 21.0F, -39.0F, 0.0F, 0.0F, 0.0F));
 
-        return TexturedModelData.of(data, 128, 128);
+        ModelPartData cube_r3 = bb_main.addChild("cube_r3", ModelPartBuilder.create().uv(0, 123).cuboid(7.0F, -24.0F, -11.0F, 29.0F, 6.0F, 8.0F),
+                ModelTransform.of(2.0F, 21.0F, -40.0F, 0.0F, 0.6109F, 0.0F));
+
+        ModelPartData cube_r4 = bb_main.addChild("cube_r4", ModelPartBuilder.create().uv(204, 67).cuboid(7.0F, -24.0F, -11.0F, 17.0F, 6.0F, 8.0F),
+                ModelTransform.of(-13.0F, 21.0F, -85.0F, 0.0F, -1.5272F, 0.0F));
+
+        ModelPartData cube_r5 = bb_main.addChild("cube_r5", ModelPartBuilder.create().uv(204, 67).cuboid(7.0F, -24.0F, -11.0F, 17.0F, 6.0F, 8.0F),
+                ModelTransform.of(-13.0F, 21.0F, 44.0F, 0.0F, -1.5272F, 0.0F));
+
+        ModelPartData cube_r6 = bb_main.addChild("cube_r6", ModelPartBuilder.create().uv(204, 53).cuboid(7.0F, -24.0F, -11.0F, 22.0F, 6.0F, 8.0F),
+                ModelTransform.of(0.0F, 21.0F, 46.0F, 0.0F, -1.5272F, 0.0F));
+
+        ModelPartData cube_r7 = bb_main.addChild("cube_r7", ModelPartBuilder.create().uv(0, 123).cuboid(7.0F, -24.0F, -11.0F, 29.0F, 6.0F, 8.0F),
+                ModelTransform.of(0.0F, 21.0F, 46.0F, 0.0F, -0.6981F, 0.0F));
+
+        ModelPartData cube_r8 = bb_main.addChild("cube_r8", ModelPartBuilder.create().uv(0, 123).cuboid(7.0F, -24.0F, -11.0F, 29.0F, 6.0F, 8.0F),
+                ModelTransform.of(0.0F, 21.0F, 46.0F, 0.0F, 0.0F, 0.0F));
+
+        ModelPartData cube_r9 = bb_main.addChild("cube_r9", ModelPartBuilder.create().uv(200, 97).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -36.0F, 41.0F, -3.0107F, 0.0F, 0.0F));
+
+        ModelPartData cube_r10 = bb_main.addChild("cube_r10", ModelPartBuilder.create().uv(40, 188).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -37.0F, -47.0F, 3.0543F, 0.0F, 0.0F));
+
+        ModelPartData cube_r11 = bb_main.addChild("cube_r11", ModelPartBuilder.create().uv(32, 137).cuboid(10.0F, -24.5F, -14.0F, 1.0F, 3.0F, 3.0F).uv(24, 137).cuboid(10.0F, -24.5F, -38.0F, 1.0F, 3.0F, 3.0F).uv(16, 137).cuboid(10.0F, -24.5F, -34.0F, 1.0F, 3.0F, 3.0F).uv(8, 137).cuboid(10.0F, -24.5F, -30.0F, 1.0F, 3.0F, 3.0F).uv(0, 137).cuboid(10.0F, -24.5F, -26.0F, 1.0F, 3.0F, 3.0F).uv(90, 133).cuboid(10.0F, -24.5F, -22.0F, 1.0F, 3.0F, 3.0F).uv(82, 133).cuboid(10.0F, -24.5F, -18.0F, 1.0F, 3.0F, 3.0F),
+                ModelTransform.of(7.0F, -26.0F, 24.0F, 0.0F, 0.0F, 0.1745F));
+
+        ModelPartData cube_r12 = bb_main.addChild("cube_r12", ModelPartBuilder.create().uv(74, 133).cuboid(10.0F, -24.5F, -14.0F, 1.0F, 3.0F, 3.0F).uv(90, 128).cuboid(10.0F, -24.5F, -18.0F, 1.0F, 3.0F, 3.0F).uv(82, 128).cuboid(10.0F, -24.5F, -22.0F, 1.0F, 3.0F, 3.0F).uv(74, 128).cuboid(10.0F, -24.5F, -26.0F, 1.0F, 3.0F, 3.0F).uv(90, 123).cuboid(10.0F, -24.5F, -30.0F, 1.0F, 3.0F, 3.0F).uv(82, 123).cuboid(10.0F, -24.5F, -34.0F, 1.0F, 3.0F, 3.0F).uv(74, 123).cuboid(10.0F, -24.5F, -38.0F, 1.0F, 3.0F, 3.0F).uv(104, 145).cuboid(-11.0F, -22.5F, -38.0F, 22.0F, 8.0F, 28.0F),
+                ModelTransform.of(3.0F, -26.0F, 24.0F, 0.0F, 0.0F, 0.3491F));
+
+        ModelPartData cube_r13 = bb_main.addChild("cube_r13", ModelPartBuilder.create().uv(100, 97).cuboid(-11.0F, -35.5F, -14.0F, 22.0F, 21.0F, 28.0F),
+                ModelTransform.of(12.0F, -32.0F, 0.0F, 0.0F, 0.0F, -0.0436F));
+
+        ModelPartData cube_r14 = bb_main.addChild("cube_r14", ModelPartBuilder.create().uv(0, 188).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -55.0F, 25.0F, -2.4435F, 0.0F, 0.0F));
+
+        ModelPartData cube_r15 = bb_main.addChild("cube_r15", ModelPartBuilder.create().uv(184, 180).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -55.0F, 27.0F, 2.4435F, 0.0F, 0.0F));
+
+        ModelPartData cube_r16 = bb_main.addChild("cube_r16", ModelPartBuilder.create().uv(100, 53).cuboid(-13.0F, -40.0F, -11.0F, 30.0F, 22.0F, 22.0F),
+                ModelTransform.of(0.0F, 21.0F, 43.0F, 0.0F, 0.0F, 0.0F));
+
+        ModelPartData cube_r17 = bb_main.addChild("cube_r17", ModelPartBuilder.create().uv(0, 145).cuboid(-13.0F, -40.0F, -11.0F, 30.0F, 21.0F, 22.0F),
+                ModelTransform.of(0.0F, -38.0F, -47.0F, 3.0543F, 0.0F, 0.0F));
+
+        ModelPartData cube_r18 = bb_main.addChild("cube_r18", ModelPartBuilder.create().uv(144, 180).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -55.0F, -31.0F, 2.4435F, 0.0F, 0.0F));
+
+        ModelPartData cube_r19 = bb_main.addChild("cube_r19", ModelPartBuilder.create().uv(104, 180).cuboid(-3.0F, -28.0F, -5.0F, 10.0F, 30.0F, 10.0F),
+                ModelTransform.of(0.0F, -55.0F, -31.0F, -2.4435F, 0.0F, 0.0F));
+
+        return TexturedModelData.of(data, 512, 512);
     }
 
     @Override
     public void setAngles(HollowTitanEntity entity, float limbAngle, float limbDistance,
                           float animationProgress, float headYaw, float headPitch) {
-        float rad = (float) Math.PI / 180.0f;
-
         // rise out of the ground during the first moments
         float p = MathHelper.clamp(animationProgress / (float) HollowTitanEntity.RISE_TICKS, 0.0f, 1.0f);
         float eased = p * p * (3.0f - 2.0f * p);
         this.root.pivotY = (1.0f - eased) * 80.0f;
 
-        this.head.yaw = headYaw * rad;
-        this.head.pitch = headPitch * rad + 0.04f * MathHelper.sin(animationProgress * 0.1f);
-
+        // lean back a little when it attacks, and breathe slowly
         float t = Math.min(1.0f, entity.getAnim() / 12.0f);
-        float idle = 0.06f * MathHelper.sin(animationProgress * 0.08f);
-
-        this.jaw.pitch = 0.2f + 0.15f * MathHelper.sin(animationProgress * 0.08f) + 0.9f * t;
-        this.rightArm.pitch = idle * (1.0f - t) - 2.6f * t;
-        this.leftArm.pitch = -idle * (1.0f - t) - 2.6f * t;
-        this.rightArm.roll = 0.1f + 0.5f * t;
-        this.leftArm.roll = -0.1f - 0.5f * t;
+        this.bbMain.pitch = -0.06f * t + 0.012f * MathHelper.sin(animationProgress * 0.07f);
     }
 
     @Override

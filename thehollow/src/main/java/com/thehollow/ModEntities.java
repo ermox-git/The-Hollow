@@ -38,7 +38,7 @@ public final class ModEntities {
             Registries.ENTITY_TYPE,
             Identifier.of(TheHollow.MOD_ID, "hollow_titan"),
             EntityType.Builder.create(HollowTitanEntity::new, SpawnGroup.MONSTER)
-                    .dimensions(2.8f, 6.0f)
+                    .dimensions(4.8f, 4.6f)
                     .maxTrackingRange(16)
                     .build("hollow_titan"));
 

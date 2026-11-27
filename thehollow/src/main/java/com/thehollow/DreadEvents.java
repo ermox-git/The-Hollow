@@ -17,7 +17,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -67,7 +66,7 @@ public final class DreadEvents {
                 float pitch = (float) (0.8 + closeness * 0.5);
                 world.playSound(null, player.getX(), player.getY(), player.getZ(),
                         SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.AMBIENT, volume, pitch);
-                NEXT_BEAT.put(player.getUuid(), time + (long) MathHelper.clamp(10.0 + best * 1.3, 10.0, 52.0));
+                NEXT_BEAT.put(player.getUuid(), time + (long) Math.max(10.0, Math.min(52.0, 10.0 + best * 1.3)));
             }
 
             if (best < 14.0 && time % 80 == 0) {
