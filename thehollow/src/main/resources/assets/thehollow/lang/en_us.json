@@ -12,5 +12,6 @@
   "item.thehollow.hollow_mask": "Hollow Mask",
   "entity.thehollow.hollow_titan": "The Hollow Titan",
   "entity.thehollow.mini_watcher": "Mini Watcher",
-  "entity.thehollow.hollow_boulder": "Hollow Boulder"
+  "entity.thehollow.hollow_boulder": "Hollow Boulder",
+  "block.thehollow.hollow_barrier": "Hollow Barrier"
 }

@@ -2,6 +2,7 @@ package com.thehollow;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.MapColor;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.sound.BlockSoundGroup;
@@ -16,6 +17,17 @@ public final class ModBlocks {
                     .requiresTool()
                     .sounds(BlockSoundGroup.DEEPSLATE)
                     .luminance(state -> 5)));
+
+    /** Placed by the Wall Rune. Not obtainable as an item. */
+    public static final Block HOLLOW_BARRIER = Registry.register(
+            Registries.BLOCK,
+            Identifier.of(TheHollow.MOD_ID, "hollow_barrier"),
+            new HollowBarrierBlock(AbstractBlock.Settings.create()
+                    .mapColor(MapColor.CLEAR)
+                    .strength(-1.0f, 3600000.0f)
+                    .dropsNothing()
+                    .nonOpaque()
+                    .noBlockBreakParticles()));
 
     private ModBlocks() {}
 

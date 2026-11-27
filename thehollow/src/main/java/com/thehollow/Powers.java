@@ -7,7 +7,6 @@ import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -45,10 +44,8 @@ public final class Powers {
     public static final int ORB_COOLDOWN_TICKS = 60 * 20;
     // ---------------------
 
-    private record Wall(RegistryKey<World> dim, List<BlockPos> blocks, int expire) {}
     private record Frozen(RegistryKey<World> dim, UUID id, int expire) {}
 
-    private static final List<Wall> WALLS = new ArrayList<>();
     private static final List<Frozen> FROZEN = new ArrayList<>();
 
     private Powers() {}
@@ -92,7 +89,7 @@ public final class Powers {
         Direction facing = player.getHorizontalFacing();
         Direction side = facing.rotateYClockwise();
         BlockPos center = player.getBlockPos().offset(facing, 3);
-        BlockState wallState = Blocks.BLACKSTONE.getDefaultState();
+        BlockState wallState = ModBlocks.HOLLOW_BARRIER.getDefaultState();
         List<BlockPos> placed = new ArrayList<>();
         for (int sideStep = -3; sideStep <= 3; sideStep++) {
             for (int height = 0; height < 4; height++) {
@@ -100,6 +97,9 @@ public final class Powers {
                 BlockState current = world.getBlockState(pos);
                 if (current.isAir() || current.isReplaceable()) {
                     world.setBlockState(pos, wallState);
+                    world.scheduleBlockTick(pos, ModBlocks.HOLLOW_BARRIER, WALL_DURATION_TICKS);
+                    world.spawnParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                            4, 0.3, 0.3, 0.3, 0.02);
                     placed.add(pos);
                 }
             }
@@ -108,7 +108,6 @@ public final class Powers {
             player.sendMessage(Text.literal("No room for a wall here."), true);
             return false;
         }
-        WALLS.add(new Wall(world.getRegistryKey(), placed, server.getTicks() + WALL_DURATION_TICKS));
         world.playSound(null, center, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS, 1.0f, 0.6f);
         return true;
     }
@@ -147,31 +146,12 @@ public final class Powers {
     private static void tick(MinecraftServer server) {
         int now = server.getTicks();
 
-        Iterator<Wall> walls = WALLS.iterator();
-        while (walls.hasNext()) {
-            Wall wall = walls.next();
-            if (now >= wall.expire()) {
-                removeWall(server, wall);
-                walls.remove();
-            }
-        }
-
         Iterator<Frozen> frozen = FROZEN.iterator();
         while (frozen.hasNext()) {
             Frozen f = frozen.next();
             if (now >= f.expire()) {
                 unfreeze(server, f);
                 frozen.remove();
-            }
-        }
-    }
-
-    private static void removeWall(MinecraftServer server, Wall wall) {
-        ServerWorld world = server.getWorld(wall.dim());
-        if (world == null) return;
-        for (BlockPos pos : wall.blocks()) {
-            if (world.getBlockState(pos).isOf(Blocks.BLACKSTONE)) {
-                world.setBlockState(pos, Blocks.AIR.getDefaultState());
             }
         }
     }
@@ -185,11 +165,9 @@ public final class Powers {
         }
     }
 
-    /** Clean up so nothing stays frozen or walled when the world closes. */
+    /** Clean up so nothing stays frozen when the world closes (walls expire on their own scheduled tick). */
     private static void shutdown(MinecraftServer server) {
-        for (Wall wall : WALLS) removeWall(server, wall);
         for (Frozen f : FROZEN) unfreeze(server, f);
-        WALLS.clear();
         FROZEN.clear();
     }
 }
