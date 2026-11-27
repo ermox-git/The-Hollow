@@ -27,6 +27,15 @@ public final class ModItems {
     public static final Item WATCHER_SPAWN_EGG = add("watcher_spawn_egg",
             new SpawnEggItem(ModEntities.WATCHER, 0xE8E4D8, 0x1A0000, new Item.Settings()));
 
+    public static final Item HOLLOW_RELIC = add("hollow_relic",
+            new RelicItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC).fireproof()));
+
+    public static final Item REAPERS_EDGE = add("reapers_edge",
+            new ReaperBladeItem(new Item.Settings()
+                    .rarity(Rarity.EPIC)
+                    .fireproof()
+                    .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.NETHERITE, 4, -2.2f))));
+
     private ModItems() {}
 
     private static Item add(String id, Item item) {
@@ -34,8 +43,14 @@ public final class ModItems {
     }
 
     public static void register() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(e -> e.add(HOLLOW_SIGIL));
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(e -> e.add(VEILCUTTER));
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(e -> {
+            e.add(HOLLOW_SIGIL);
+            e.add(HOLLOW_RELIC);
+        });
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.COMBAT).register(e -> {
+            e.add(VEILCUTTER);
+            e.add(REAPERS_EDGE);
+        });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(e -> e.add(WARD_LANTERN));
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(e -> e.add(WATCHER_SPAWN_EGG));
     }

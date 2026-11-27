@@ -13,6 +13,8 @@ public class TheHollow implements ModInitializer {
         ModEntities.register();
         ModItems.register();
         DreadEvents.register();
+        PowerNetworking.register();
+        Powers.register();
         LOGGER.info("The Hollow is awake.");
     }
 }
