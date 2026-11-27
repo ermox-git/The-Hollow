@@ -36,6 +36,12 @@ public final class ModItems {
                     .fireproof()
                     .attributeModifiers(SwordItem.createAttributeModifiers(ToolMaterials.NETHERITE, 4, -2.2f))));
 
+    public static final Item WALL_RUNE = add("wall_rune",
+            new WallRuneItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC).fireproof()));
+
+    public static final Item STILLNESS_ORB = add("stillness_orb",
+            new StillnessOrbItem(new Item.Settings().maxCount(1).rarity(Rarity.EPIC).fireproof()));
+
     private ModItems() {}
 
     private static Item add(String id, Item item) {
@@ -51,7 +57,11 @@ public final class ModItems {
             e.add(VEILCUTTER);
             e.add(REAPERS_EDGE);
         });
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(e -> e.add(WARD_LANTERN));
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(e -> {
+            e.add(WARD_LANTERN);
+            e.add(WALL_RUNE);
+            e.add(STILLNESS_ORB);
+        });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(e -> e.add(WATCHER_SPAWN_EGG));
     }
 }

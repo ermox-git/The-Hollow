@@ -12,9 +12,9 @@ import net.minecraft.text.Text;
 public class PowerSelectScreen extends Screen {
     private static final String[] NAMES = {"Reaper's Edge", "Hollow Wall", "Stillness Orb"};
     private static final String[] TIPS = {
-            "Gives you a sword that instantly kills anything it hits. Then 100 seconds of cooldown.",
-            "Raises a wall in front of you for 50 seconds. 10 second cooldown.",
-            "Freezes every creature within 40 blocks for 10 seconds. 60 second cooldown."
+            "The relic shatters into a sword that instantly kills anything it hits. 100 second cooldown.",
+            "The relic shatters into a rune that raises a wall for 50 seconds. 10 second cooldown.",
+            "The relic shatters into an orb that freezes everything within 40 blocks. 60 second cooldown."
     };
 
     public PowerSelectScreen() {
@@ -40,7 +40,7 @@ public class PowerSelectScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, this.height / 2 - 66, 0xFF4455);
-        context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Choose a power"), this.width / 2, this.height / 2 - 50, 0xBBBBBB);
+        context.drawCenteredTextWithShadow(this.textRenderer, Text.literal("Choose carefully: the relic will shatter"), this.width / 2, this.height / 2 - 50, 0xBBBBBB);
     }
 
     @Override

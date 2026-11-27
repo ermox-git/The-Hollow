@@ -72,10 +72,11 @@ public class WatcherModel extends SinglePartEntityModel<WatcherEntity> {
     public void setAngles(WatcherEntity entity, float limbAngle, float limbDistance,
                           float animationProgress, float headYaw, float headPitch) {
         float rad = (float) Math.PI / 180.0f;
+        int state = entity.getRageState();
+
         this.head.yaw = headYaw * rad;
         this.head.pitch = headPitch * rad;
         this.head.roll = 0.28f; // permanently cocked head
-
         this.jaw.pitch = 0.35f + 0.12f * MathHelper.sin(animationProgress * 0.15f);
 
         float swing = MathHelper.cos(limbAngle * 0.6662f) * 1.2f * limbDistance;
@@ -83,10 +84,32 @@ public class WatcherModel extends SinglePartEntityModel<WatcherEntity> {
         this.leftLeg.pitch = -swing;
         this.rightArm.pitch = -swing * 0.4f;
         this.leftArm.pitch = swing * 0.4f;
-
-        // arms hang and sway slightly
         this.rightArm.roll = 0.06f + 0.04f * MathHelper.cos(animationProgress * 0.09f);
         this.leftArm.roll = -0.06f - 0.04f * MathHelper.cos(animationProgress * 0.09f + 1.3f);
+
+        if (state == WatcherEntity.ROARING) {
+            // head thrown back, jaw wide, arms flung up and trembling
+            float shake = MathHelper.sin(animationProgress * 1.8f) * 0.12f;
+            this.head.pitch = -0.9f;
+            this.head.roll = shake;
+            this.jaw.pitch = 1.2f + shake;
+            this.rightArm.pitch = -2.7f + shake;
+            this.leftArm.pitch = -2.7f - shake;
+            this.rightArm.roll = 0.6f;
+            this.leftArm.roll = -0.6f;
+        } else if (state == WatcherEntity.ENRAGED) {
+            // arms reaching forward, jaw hanging open, faster stride
+            float claw = MathHelper.sin(animationProgress * 0.9f) * 0.15f;
+            this.head.roll = 0.0f;
+            this.jaw.pitch = 0.9f;
+            this.rightArm.pitch = -1.5f + claw;
+            this.leftArm.pitch = -1.5f - claw;
+            this.rightArm.roll = 0.1f;
+            this.leftArm.roll = -0.1f;
+            float run = MathHelper.cos(limbAngle * 0.9f) * 1.5f * limbDistance;
+            this.rightLeg.pitch = run;
+            this.leftLeg.pitch = -run;
+        }
     }
 
     @Override

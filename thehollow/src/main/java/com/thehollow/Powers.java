@@ -1,10 +1,8 @@
 package com.thehollow;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -15,7 +13,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.RegistryKey;
@@ -30,7 +28,10 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-/** Server-side logic for the three Hollow Relic powers. All timings are in one place. */
+/**
+ * Hollow Relic logic. Choosing a power on the relic shatters it and gives you the matching item.
+ * The wall and orb effects themselves live here and are triggered by their items.
+ */
 public final class Powers {
     public static final int REAPER = 0;
     public static final int WALL = 1;
@@ -44,12 +45,9 @@ public final class Powers {
     public static final int ORB_COOLDOWN_TICKS = 60 * 20;
     // ---------------------
 
-    private static final String[] NAMES = {"Reaper's Edge", "Hollow Wall", "Stillness Orb"};
-
     private record Wall(RegistryKey<World> dim, List<BlockPos> blocks, int expire) {}
     private record Frozen(RegistryKey<World> dim, UUID id, int expire) {}
 
-    private static final Map<UUID, int[]> READY = new HashMap<>();
     private static final List<Wall> WALLS = new ArrayList<>();
     private static final List<Frozen> FROZEN = new ArrayList<>();
 
@@ -60,46 +58,37 @@ public final class Powers {
         ServerLifecycleEvents.SERVER_STOPPING.register(Powers::shutdown);
     }
 
-    // ------------------------------------------------------------------ activation
+    // ------------------------------------------------------------------ relic choice
 
     public static void activate(ServerPlayerEntity player, int power) {
-        boolean holdsRelic = player.getMainHandStack().isOf(ModItems.HOLLOW_RELIC)
-                || player.getOffHandStack().isOf(ModItems.HOLLOW_RELIC);
-        if (!holdsRelic || power < 0 || power > 2) return;
-        MinecraftServer server = player.getServer();
-        if (server == null) return;
+        ItemStack relic = player.getMainHandStack().isOf(ModItems.HOLLOW_RELIC)
+                ? player.getMainHandStack()
+                : player.getOffHandStack();
+        if (!relic.isOf(ModItems.HOLLOW_RELIC) || power < 0 || power > 2) return;
+
+        Item reward = switch (power) {
+            case REAPER -> ModItems.REAPERS_EDGE;
+            case WALL -> ModItems.WALL_RUNE;
+            default -> ModItems.STILLNESS_ORB;
+        };
+
+        relic.decrement(1);
+        player.giveItemStack(new ItemStack(reward));
+
         ServerWorld world = (ServerWorld) player.getWorld();
-        int now = server.getTicks();
-
-        switch (power) {
-            case REAPER -> giveReaper(player);
-            case WALL -> {
-                if (onCooldown(player, WALL, now)) return;
-                if (buildWall(player, world, now)) {
-                    setCooldown(player, WALL, WALL_COOLDOWN_TICKS, now);
-                }
-            }
-            default -> {
-                if (onCooldown(player, ORB, now)) return;
-                freezeEverything(player, world, now);
-                setCooldown(player, ORB, ORB_COOLDOWN_TICKS, now);
-            }
-        }
+        world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.PLAYERS, 1.0f, 0.5f);
+        world.spawnParticles(ParticleTypes.SOUL, player.getX(), player.getY() + 1.2, player.getZ(), 30, 0.4, 0.5, 0.4, 0.05);
+        player.sendMessage(Text.literal("The relic shatters. Its power takes form."), true);
     }
 
-    private static void giveReaper(ServerPlayerEntity player) {
-        PlayerInventory inv = player.getInventory();
-        for (int i = 0; i < inv.size(); i++) {
-            if (inv.getStack(i).isOf(ModItems.REAPERS_EDGE)) {
-                player.sendMessage(Text.literal("You already carry the Reaper's Edge."), true);
-                return;
-            }
-        }
-        player.giveItemStack(new ItemStack(ModItems.REAPERS_EDGE));
-        player.sendMessage(Text.literal("The Reaper's Edge answers your call."), true);
-    }
+    // ------------------------------------------------------------------ item effects
 
-    private static boolean buildWall(ServerPlayerEntity player, ServerWorld world, int now) {
+    /** Returns false if there was no room for the wall (so the item is not put on cooldown). */
+    public static boolean useWall(ServerPlayerEntity player) {
+        MinecraftServer server = player.getServer();
+        if (server == null) return false;
+        ServerWorld world = (ServerWorld) player.getWorld();
+
         Direction facing = player.getHorizontalFacing();
         Direction side = facing.rotateYClockwise();
         BlockPos center = player.getBlockPos().offset(facing, 3);
@@ -119,12 +108,17 @@ public final class Powers {
             player.sendMessage(Text.literal("No room for a wall here."), true);
             return false;
         }
-        WALLS.add(new Wall(world.getRegistryKey(), placed, now + WALL_DURATION_TICKS));
+        WALLS.add(new Wall(world.getRegistryKey(), placed, server.getTicks() + WALL_DURATION_TICKS));
         world.playSound(null, center, SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.PLAYERS, 1.0f, 0.6f);
         return true;
     }
 
-    private static void freezeEverything(ServerPlayerEntity caster, ServerWorld world, int now) {
+    public static void useOrb(ServerPlayerEntity caster) {
+        MinecraftServer server = caster.getServer();
+        if (server == null) return;
+        ServerWorld world = (ServerWorld) caster.getWorld();
+        int now = server.getTicks();
+
         Box area = new Box(caster.getBlockPos()).expand(ORB_RADIUS);
         double maxSq = (double) ORB_RADIUS * ORB_RADIUS;
         List<LivingEntity> targets = world.getEntitiesByClass(LivingEntity.class, area,
@@ -146,22 +140,6 @@ public final class Powers {
                 200, 6.0, 2.0, 6.0, 0.1);
         world.playSound(null, caster.getBlockPos(), SoundEvents.ENTITY_PLAYER_HURT_FREEZE, SoundCategory.PLAYERS, 1.5f, 0.5f);
         caster.sendMessage(Text.literal("Everything within " + ORB_RADIUS + " blocks goes still."), true);
-    }
-
-    // ------------------------------------------------------------------ cooldowns
-
-    private static boolean onCooldown(ServerPlayerEntity player, int slot, int now) {
-        int[] ready = READY.computeIfAbsent(player.getUuid(), k -> new int[3]);
-        if (now < ready[slot]) {
-            int seconds = (ready[slot] - now + 19) / 20;
-            player.sendMessage(Text.literal(NAMES[slot] + " recharging: " + seconds + "s"), true);
-            return true;
-        }
-        return false;
-    }
-
-    private static void setCooldown(ServerPlayerEntity player, int slot, int ticks, int now) {
-        READY.computeIfAbsent(player.getUuid(), k -> new int[3])[slot] = now + ticks;
     }
 
     // ------------------------------------------------------------------ timers
@@ -213,6 +191,5 @@ public final class Powers {
         for (Frozen f : FROZEN) unfreeze(server, f);
         WALLS.clear();
         FROZEN.clear();
-        READY.clear();
     }
 }
